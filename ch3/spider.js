@@ -12,28 +12,42 @@ const mkdirp = require('mkdirp');
 
 const utilities = require('./utilities');
 
+function saveFile(filename, body, callback) {
+  mkdirp(path.dirname(filename), (err) => {    // [3]
+    if (err) {
+      return callback(err);
+    }
+    return fs.writeFile(filename, body, callback);
+  });
+}
+
+function download(url, filename, callback) {
+  console.log(`Downloading ${url}`);
+  request(url, (err, response, body) => {      // [2]
+    if (err) {
+      return callback(err);
+    }
+    return saveFile(filename, body, (error) => {
+      if (error) {
+        return callback(error);
+      }
+      console.log(`Downloaded and saved: ${url}`);
+      return callback(null, body);
+    });
+  });
+}
+
 function spider(url, callback) {
   const filename = utilities.urlToFilename(url);
   fs.exists(filename, (exists) => {        // [1]
     if (exists) {
       return callback(null, filename, false);
     }
-    console.log(`Downloading ${url}`);
-    request(url, (err, response, body) => {      // [2]
+    return download(url, filename, (err) => {
       if (err) {
         return callback(err);
       }
-      mkdirp(path.dirname(filename), (err) => {    // [3]
-        if (err) {
-          return callback(err);
-        }
-        fs.writeFile(filename, body, (err) => { // [4]
-          if (err) {
-            return callback(err);
-          }
-          return callback(null, filename, true);
-        });
-      });
+      return callback(null, filename, true);
     });
   });
 }
