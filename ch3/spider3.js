@@ -6,6 +6,8 @@ const mkdirp = require('mkdirp');
 const path = require('path');
 const utilities = require('./utilities');
 
+const spidering = new Map();
+
 console.dir((new Date()).toTimeString());
 spider(process.argv[2], 1, (err) => {
   if (err) {
@@ -18,8 +20,12 @@ spider(process.argv[2], 1, (err) => {
 });
 
 function spider(url, nesting, callback) {
+  if (spidering.has(url)) {
+    return process.nextTick(callback);
+  }
+  spidering.set(url, true);
   const filename = utilities.urlToFilename(url);
-  fs.readFile(filename, 'utf8', (err, body) => {
+  return fs.readFile(filename, 'utf8', (err, body) => {
     if (err) {
       if (err.code !== 'ENOENT') {
         return callback(err);
