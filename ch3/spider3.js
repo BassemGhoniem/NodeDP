@@ -14,7 +14,6 @@ spider(process.argv[2], 1, (err) => {
   } else {
     console.log('Download complete');
     console.dir((new Date()).toTimeString());
-
   }
 });
 
@@ -44,23 +43,21 @@ function spiderLinks(currentUrl, body, nesting, callback) {
     return process.nextTick(callback);
   }
   const links = utilities.getPageLinks(currentUrl, body);
-  return iterateSeries(links, nesting, spider, callback);
-}
-
-function iterateSeries(collection, iteratorCBParam, iteratorCallback, finalCallback) {
-  function iterate(index) {
-    if (index === collection.length) {
-      return finalCallback();
-    }
-    return iteratorCallback(collection[index], iteratorCBParam - 1, (err) => {
-      if (err) {
-        return finalCallback(err);
-      }
-      return iterate(index + 1);
-    });
+  if (links.length === 0) {
+    return process.nextTick(callback);
   }
+  let completed = 0;
+  let hasErrors = false;
 
-  return iterate(0);
+  return links.forEach(link => spider(link, nesting - 1, (err) => {
+    if (err) {
+      hasErrors = true;
+      return callback(err);
+    }
+    if (++completed === links.length && !hasErrors) {
+      return callback();
+    }
+  }));
 }
 
 function saveFile(filename, contents, callback) {
