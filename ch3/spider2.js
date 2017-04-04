@@ -40,25 +40,25 @@ function spiderLinks(currentUrl, body, nesting, callback) {
   if (nesting === 0) {
     return process.nextTick(callback);
   }
+  const links = utilities.getPageLinks(currentUrl, body);
+  return iterateSeries(links, nesting, spider, callback);
+}
 
-  const links = utilities.getPageLinks(currentUrl, body); // [1]
-
-  function iterate(index) { // [2]
-    if (index === links.length) {
-      return callback();
+function iterateSeries(collection, iteratorCBParam, iteratorCallback, finalCallback) {
+  function iterate(index) {
+    if (index === collection.length) {
+      return finalCallback();
     }
-
-    return spider(links[index], nesting - 1, (err) => { // [3]
+    return iteratorCallback(collection[index], iteratorCBParam - 1, (err) => {
       if (err) {
-        return callback(err);
+        return finalCallback(err);
       }
       return iterate(index + 1);
     });
   }
 
-  return iterate(0); // [4]
+  return iterate(0);
 }
-
 
 function saveFile(filename, contents, callback) {
   mkdirp(path.dirname(filename), (err) => {
