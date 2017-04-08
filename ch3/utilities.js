@@ -37,3 +37,15 @@ module.exports.getPageLinks = (currentUrl, body) =>
   [].slice.call(cheerio.load(body)('a'))
     .map(element => module.exports.getLinkUrl(currentUrl, element))
     .filter(element => !!element);
+
+module.exports.promisify = callbackBasedApi => function (...args) {
+  return new Promise((resolve, reject) => {
+    args.push((err, result) => {
+      if (err) return reject(err);
+      if (arguments.length <= 2) return resolve(result);
+      return resolve([].slice.call(args, 1));
+    });
+
+    callbackBasedApi(...args);
+  });
+};
