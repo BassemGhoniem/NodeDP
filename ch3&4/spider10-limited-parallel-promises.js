@@ -11,7 +11,7 @@ const writeFile = utilities.promisify(fs.writeFile);
 const path = require('path');
 const TaskQueue = require('./taskQueue-promises');
 
-const downloadQueue = new TaskQueue(5);
+const downloadQueue = new TaskQueue(2);
 
 console.dir((new Date()).toTimeString());
 

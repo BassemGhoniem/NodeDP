@@ -43,7 +43,7 @@ module.exports.promisify = callbackBasedApi => function (...args) {
     args.push((err, result) => {
       if (err) return reject(err);
       if (arguments.length <= 2) return resolve(result);
-      return resolve([].slice.call(args, 1));
+      return resolve(args.slice(1));
     });
 
     callbackBasedApi(...args);
