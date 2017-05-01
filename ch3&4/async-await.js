@@ -13,10 +13,12 @@ function getPageHtml(url) {
     });
   });
 }
+
 async function main() {
   const html = await getPageHtml('http://google.com');
   console.log(html);
 }
+
 main();
 
 console.log('Loading...');
